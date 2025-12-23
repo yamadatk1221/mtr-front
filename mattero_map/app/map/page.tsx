@@ -2,6 +2,21 @@
 
 import { useState } from "react";
 import MapView from "./components/MapView";
+import { PlaceCard } from "@/components/PlaceCard";
+import type { place } from "@/domain/place";
+
+const dummy: place = {
+  id: "1",
+  name: "渋谷GYM",
+  latitude: 35.6595,
+  longitude: 139.7005,
+  visitedAt: "2025-12-20",
+  memo: "スミスマシンがなかった",
+  categoryName: "筋トレ",
+  isPublic: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
 
 export default function Home() {
   const [lastTap, setLastTap] = useState<{ lat: number; lng: number } | null>(
@@ -10,6 +25,9 @@ export default function Home() {
 
   return (
     <main style={{ position: "relative" }}>
+      <div style={{ padding: 12 }}>
+        <PlaceCard place={dummy} onClick={() => alert("tap")} />
+      </div>
       <MapView onMapTap={(p) => setLastTap(p)} />
 
       {/* まずは動作確認用。後でshadcn/uiのSheetに置き換える想定 */}
