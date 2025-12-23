@@ -13,9 +13,9 @@ MapLibre
 ## UI ライブラリ
 
 Mantine
-https://mantine.dev/core/package/
-
 npm i maplibre-gl
+
+https://mantine.dev/core/package/
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
