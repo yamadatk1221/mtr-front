@@ -4,6 +4,9 @@ import { useState } from "react";
 import MapView from "./components/MapView";
 import { PlaceCard } from "@/components/PlaceCard";
 import { place } from "@/domain/place";
+import { Modal } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { openModal } from "@mantine/modals";
 
 const dummy: place = {
   id: "1",
@@ -22,6 +25,7 @@ export default function Home() {
   const [lastTap, setLastTap] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <main style={{ position: "relative" }}>
@@ -49,12 +53,15 @@ export default function Home() {
           </div>
           <button
             style={{ marginTop: 8, padding: "8px 12px", borderRadius: 10 }}
-            onClick={() => alert("ここから登録フォームへ")}
+            onClick={open}
           >
             この場所を登録
           </button>
         </div>
       )}
+      <Modal opened={opened} onClose={close} title="register place">
+        {/* Modal content */}
+      </Modal>
     </main>
   );
 }
