@@ -1,6 +1,7 @@
 ## node.js
 
 v20.19.6
+nvm use
 
 ## 起動
 

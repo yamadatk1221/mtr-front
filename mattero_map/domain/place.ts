@@ -5,14 +5,14 @@ export type place = {
   /** 表示名(店名など) */
   name: string;
 
-  /** 緯度 */
-  latitude: number;
-
   /** 経度 */
-  longitude: number;
+  lng: number;
+
+  /** 緯度 */
+  lat: number;
 
   /** 訪問日 */
-  visitedAt: string;
+  visitedAt: Date;
 
   /** メモ */
   memo?: string;

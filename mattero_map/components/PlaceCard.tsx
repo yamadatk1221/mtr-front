@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Text, Group, Stack, Badge } from "@mantine/core";
-import type { place } from "../domain/place";
+import { place } from "../domain/place";
 
 type Props = {
   place: place;
@@ -23,18 +23,14 @@ export function PlaceCard({ place, onClick }: Props) {
             {place.name}
           </Text>
 
-          {place.latitude && <Badge variant="light">★ {place.longitude}</Badge>}
+          {place.categoryName && (
+            <Badge variant="light">★ {place.categoryName}</Badge>
+          )}
         </Group>
 
         {place.visitedAt && (
           <Text size="sm" c="dimmed">
-            {place.visitedAt}
-          </Text>
-        )}
-
-        {place.categoryName && (
-          <Text size="sm" lineClamp={2}>
-            {place.categoryName}
+            {place.visitedAt.toLocaleDateString()}
           </Text>
         )}
 

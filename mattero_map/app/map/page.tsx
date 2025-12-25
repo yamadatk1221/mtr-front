@@ -3,14 +3,14 @@
 import { useState } from "react";
 import MapView from "./components/MapView";
 import { PlaceCard } from "@/components/PlaceCard";
-import type { place } from "@/domain/place";
+import { place } from "@/domain/place";
 
 const dummy: place = {
   id: "1",
   name: "渋谷GYM",
-  latitude: 35.6595,
-  longitude: 139.7005,
-  visitedAt: "2025-12-20",
+  lat: 35.6595,
+  lng: 139.7005,
+  visitedAt: new Date("2024-06-15"),
   memo: "スミスマシンがなかった",
   categoryName: "筋トレ",
   isPublic: true,
@@ -28,7 +28,7 @@ export default function Home() {
       <div style={{ padding: 12 }}>
         <PlaceCard place={dummy} onClick={() => alert("tap")} />
       </div>
-      <MapView onMapTap={(p) => setLastTap(p)} />
+      <MapView onMapTap={(p) => setLastTap(p)} tempPin={lastTap} />
 
       {/* まずは動作確認用。後でshadcn/uiのSheetに置き換える想定 */}
       {lastTap && (
