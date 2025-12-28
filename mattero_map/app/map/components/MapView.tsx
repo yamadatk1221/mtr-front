@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { place } from "@/domain/place";
 
 type MapViewProps = {
+  places: place[];
   onMapTap?: (p: { lat: number; lng: number }) => void;
   tempPin?: { lat: number; lng: number } | null;
 };
 
-export default function MapView({ onMapTap, tempPin }: MapViewProps) {
+export default function MapView({ places, onMapTap, tempPin }: MapViewProps) {
   const mapRef = useRef<Map | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tempMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const placeMarkersRef = useRef<maplibregl.Marker[]>([]);
+
+  // ★ map が生成済みかどうか
+  const [mapReady, setMapReady] = useState(false);
 
   // 最新の onMapTap を常に呼べるようにする（stale防止）
   const onMapTapRef = useRef<MapViewProps["onMapTap"]>(onMapTap);
@@ -31,7 +37,7 @@ export default function MapView({ onMapTap, tempPin }: MapViewProps) {
       const map = new maplibregl.Map({
         container: containerRef.current!,
         style: "https://tiles.openfreemap.org/styles/liberty",
-        center: [lng, lat], // ★ 初期表示の中心
+        center: [lng, lat],
         zoom: 14,
       });
 
@@ -40,11 +46,10 @@ export default function MapView({ onMapTap, tempPin }: MapViewProps) {
         "top-right"
       );
 
-      // （任意）現在地ボタンも置きたい場合はON
       map.addControl(
         new maplibregl.GeolocateControl({
           positionOptions: { enableHighAccuracy: true },
-          trackUserLocation: false, // “追従”ではなくボタンで取得する感じ
+          trackUserLocation: false,
         }),
         "top-right"
       );
@@ -68,52 +73,42 @@ export default function MapView({ onMapTap, tempPin }: MapViewProps) {
         const dy = e.point.y - start.y;
         const dist2 = dx * dx + dy * dy;
 
-        // しきい値：6px（必要なら8〜10に上げてOK）
         if (dist2 > 6 * 6) touchMovedRef.current = true;
       });
 
       map.on("touchend", (e) => {
-        if (touchMovedRef.current) return; // ★ ドラッグ後にピンを立てない
+        if (touchMovedRef.current) return;
 
         const ll = map.unproject(e.point);
         onMapTapRef.current?.({ lat: ll.lat, lng: ll.lng });
       });
 
       mapRef.current = map;
+      setMapReady(true); // ★ 生成完了
     };
 
-    // ★ 現在地を取得してから map を生成（失敗したらフォールバック）
-    const fallback = () => createMap(139.7671, 35.6812); // 東京駅
+    const fallback = () => createMap(139.7671, 35.6812);
 
     if (!navigator.geolocation) {
       fallback();
-      return () => {
-        tempMarkerRef.current?.remove();
-        tempMarkerRef.current = null;
-
-        mapRef.current?.remove();
-        mapRef.current = null;
-
-        touchStartPointRef.current = null;
-        touchMovedRef.current = false;
-      };
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => createMap(pos.coords.longitude, pos.coords.latitude),
+        fallback,
+        {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 60_000,
+        }
+      );
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        createMap(pos.coords.longitude, pos.coords.latitude);
-      },
-      () => {
-        fallback();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 8000,
-        maximumAge: 60_000,
-      }
-    );
-
     return () => {
+      // places markers cleanup
+      placeMarkersRef.current.forEach((m) => m.remove());
+      placeMarkersRef.current = [];
+
+      // temp marker cleanup
       tempMarkerRef.current?.remove();
       tempMarkerRef.current = null;
 
@@ -122,8 +117,29 @@ export default function MapView({ onMapTap, tempPin }: MapViewProps) {
 
       touchStartPointRef.current = null;
       touchMovedRef.current = false;
+
+      setMapReady(false);
     };
   }, []);
+
+  // ★ places が変わったらマーカーを更新（mapReadyも見る）
+  useEffect(() => {
+    if (!mapReady) return;
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    // いったん全消し
+    placeMarkersRef.current.forEach((m) => m.remove());
+    placeMarkersRef.current = [];
+
+    // 作り直し
+    placeMarkersRef.current = places.map((pl) => {
+      return new maplibregl.Marker({ anchor: "bottom" })
+        .setLngLat([pl.lng, pl.lat])
+        .addTo(map);
+    });
+  }, [places, mapReady]);
 
   // tempPin が変わったらピン表示（または更新）
   useEffect(() => {
@@ -139,7 +155,10 @@ export default function MapView({ onMapTap, tempPin }: MapViewProps) {
     const lngLat: [number, number] = [tempPin.lng, tempPin.lat];
 
     if (!tempMarkerRef.current) {
-      tempMarkerRef.current = new maplibregl.Marker({ anchor: "bottom" })
+      tempMarkerRef.current = new maplibregl.Marker({
+        anchor: "bottom",
+        offset: [0, 6],
+      })
         .setLngLat(lngLat)
         .addTo(map);
     } else {
