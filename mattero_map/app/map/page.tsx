@@ -51,18 +51,62 @@ export default function Home() {
     null
   );
   const [opened, { open, close }] = useDisclosure(false);
+  const [selectedPlace, setSelectedPlace] = useState<place | null>(null);
 
   return (
     <main style={{ position: "relative" }}>
-      <div style={{ padding: 12 }}>
+      {/* <div style={{ padding: 12 }}>
         <PlaceCard place={places[0]} onClick={() => alert("tap")} />
+      </div> */}
+
+      <div>
+        <MapView
+          places={places}
+          onMapTap={(p) => setLastTap(p)}
+          tempPin={lastTap}
+          onPlaceTap={(pl) => {
+            setSelectedPlace(pl);
+            setLastTap(null); // 仮ピンUI
+          }}
+        />
       </div>
 
-      <MapView
-        places={places}
-        onMapTap={(p) => setLastTap(p)}
-        tempPin={lastTap}
-      />
+      {selectedPlace && (
+        <div
+          style={{
+            position: "fixed",
+            left: 12,
+            right: 12,
+            top: 12,
+            zIndex: 20,
+          }}
+        >
+          <div style={{ position: "relative" }}>
+            <PlaceCard place={selectedPlace} onClick={() => {}} />
+
+            <button
+              onClick={() => setSelectedPlace(null)}
+              aria-label="close place card"
+              title="閉じる"
+              style={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                width: 36,
+                height: 36,
+                borderRadius: 9999,
+                border: "none",
+                background: "rgba(0,0,0,0.55)",
+                color: "white",
+                cursor: "pointer",
+                fontSize: 18,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* まずは動作確認用。後でshadcn/uiのSheetに置き換える想定 */}
       {lastTap && (

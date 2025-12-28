@@ -7,15 +7,22 @@ import { place } from "@/domain/place";
 
 type MapViewProps = {
   places: place[];
+  onPlaceTap?: (pl: place) => void;
   onMapTap?: (p: { lat: number; lng: number }) => void;
   tempPin?: { lat: number; lng: number } | null;
 };
 
-export default function MapView({ places, onMapTap, tempPin }: MapViewProps) {
+export default function MapView({
+  places,
+  onPlaceTap,
+  onMapTap,
+  tempPin,
+}: MapViewProps) {
   const mapRef = useRef<Map | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tempMarkerRef = useRef<maplibregl.Marker | null>(null);
   const placeMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const onPlaceTapRef = useRef<MapViewProps["onPlaceTap"]>(onPlaceTap);
 
   // ★ map が生成済みかどうか
   const [mapReady, setMapReady] = useState(false);
@@ -25,6 +32,10 @@ export default function MapView({ places, onMapTap, tempPin }: MapViewProps) {
   useEffect(() => {
     onMapTapRef.current = onMapTap;
   }, [onMapTap]);
+
+  useEffect(() => {
+    onPlaceTapRef.current = onPlaceTap;
+  }, [onPlaceTap]);
 
   // タッチ開始地点（ドラッグ判定用）
   const touchStartPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -135,9 +146,37 @@ export default function MapView({ places, onMapTap, tempPin }: MapViewProps) {
 
     // 作り直し
     placeMarkersRef.current = places.map((pl) => {
-      return new maplibregl.Marker({ anchor: "bottom" })
+      const marker = new maplibregl.Marker({ anchor: "bottom" })
         .setLngLat([pl.lng, pl.lat])
         .addTo(map);
+
+      const el = marker.getElement();
+      el.style.cursor = "pointer";
+
+      // PC：click
+      el.addEventListener("click", (e) => {
+        e.stopPropagation(); // ← 地図の click に伝えない
+        onPlaceTapRef.current?.(pl);
+      });
+
+      // スマホ（これがないと map.touchend が動く）
+      el.addEventListener(
+        "touchend",
+        (e) => {
+          e.stopPropagation();
+          e.preventDefault(); // ここ大事（クリック合成を防ぐ）
+          onPlaceTapRef.current?.(pl);
+        },
+        { passive: false }
+      );
+
+      // iOS/一部端末で有効：pointer系も止める
+      el.addEventListener("pointerup", (e) => {
+        e.stopPropagation();
+        onPlaceTapRef.current?.(pl);
+      });
+
+      return marker;
     });
   }, [places, mapReady]);
 
@@ -158,6 +197,7 @@ export default function MapView({ places, onMapTap, tempPin }: MapViewProps) {
       tempMarkerRef.current = new maplibregl.Marker({
         anchor: "bottom",
         offset: [0, 6],
+        color: "#ff6b6b",
       })
         .setLngLat(lngLat)
         .addTo(map);

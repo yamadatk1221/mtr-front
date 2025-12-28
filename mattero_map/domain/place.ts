@@ -17,9 +17,6 @@ export type place = {
   /** メモ */
   memo?: string;
 
-  /** カテゴリ */
-  categoryId?: string;
-
   /** カテゴリ名 */
   categoryName?: string;
 

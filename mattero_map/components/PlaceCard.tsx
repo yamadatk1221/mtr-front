@@ -18,15 +18,13 @@ export function PlaceCard({ place, onClick }: Props) {
       style={{ cursor: onClick ? "pointer" : "default" }}
     >
       <Stack gap="xs">
-        <Group justify="space-between" align="start" wrap="nowrap">
-          <Text fw={600} lineClamp={2}>
-            {place.name}
-          </Text>
+        <Text fw={600} lineClamp={2}>
+          {place.name}
+        </Text>
 
-          {place.categoryName && (
-            <Badge variant="light">★ {place.categoryName}</Badge>
-          )}
-        </Group>
+        {place.categoryName && (
+          <Badge variant="light">★ {place.categoryName}</Badge>
+        )}
 
         {place.visitedAt && (
           <Text size="sm" c="dimmed">
