@@ -35,8 +35,8 @@ jobs:
       - name: Set env (arako)
         if: ${{ github.event.inputs.env == 'arako' }}
         run: |
-          echo "S3_BUCKET=TODO" >> $GITHUB_ENV
-          echo "ROLE_TO_ASSUME=TODO" >> $GITHUB_ENV
+          echo "S3_BUCKET=matteromap.front" >> $GITHUB_ENV
+          echo "ROLE_TO_ASSUME=arn:aws:iam::320116406949:role/github-actions-deploy-frontend" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v4
