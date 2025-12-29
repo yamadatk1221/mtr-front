@@ -41,23 +41,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ★ まずここで「本当にどこに package-lock があるか」確定させる
-      - name: Debug repo tree
-        run: |
-          pwd
-          ls -la
-          echo "---- find package.json / package-lock.json ----"
-          find . -maxdepth 4 -name "package.json" -print
-          find . -maxdepth 4 -name "package-lock.json" -print
-          echo "---- list mattero_map ----"
-          ls -la mattero_map || true
-
-      - name: Setup Node (with npm cache)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          # ★ repoルートから見たパスで固定（ここがズレると即死）
           cache-dependency-path: mattero_map/package-lock.json
 
       - name: Install
