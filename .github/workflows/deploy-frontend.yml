@@ -41,6 +41,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Change directory
+        run: cd mattero_map
+        shell: bash
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
