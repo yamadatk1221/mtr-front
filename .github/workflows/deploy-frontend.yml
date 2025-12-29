@@ -1,4 +1,4 @@
-name: Deploy static site (out -> S3)
+name: deploy-frontend
 
 on:
   workflow_dispatch:
@@ -7,17 +7,15 @@ on:
         description: "Deploy target"
         required: true
         type: choice
-        options:
-          - yamada
-          - arako
+        options: [yamada, arako]
         default: yamada
 
 permissions:
-  id-token: write # OIDC に必須
+  id-token: write
   contents: read
 
 concurrency:
-  group: deploy-static-main
+  group: deploy-frontend
   cancel-in-progress: true
 
 env:
@@ -28,20 +26,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set env (yamada)
-    if: ${{ github.event.inputs.env == 'yamada' }}
-    run: |
-      echo "S3_BUCKET=mtr-map-spa" >> $GITHUB_ENV
-      echo "ROLE_TO_ASSUME=arn:aws:iam::016944483672:role/github-actions-deploy-frontend" >> $GITHUB_ENV
+      - name: Set env (yamada)
+        if: ${{ github.event.inputs.env == 'yamada' }}
+        run: |
+          echo "S3_BUCKET=mtr-map-spa" >> $GITHUB_ENV
+          echo "ROLE_TO_ASSUME=arn:aws:iam::016944483672:role/github-actions-deploy-frontend" >> $GITHUB_ENV
 
-    steps:
-    - name: Set env (arako)
-    if: ${{ github.event.inputs.env == 'arako' }}
-    run: |
-      echo "S3_BUCKET=TODO" >> $GITHUB_ENV
-      echo "ROLE_TO_ASSUME=TODO" >> $GITHUB_ENV
+      - name: Set env (arako)
+        if: ${{ github.event.inputs.env == 'arako' }}
+        run: |
+          echo "S3_BUCKET=TODO" >> $GITHUB_ENV
+          echo "ROLE_TO_ASSUME=TODO" >> $GITHUB_ENV
 
-    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -58,17 +54,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      # OIDC でAWSにログイン（キー不要）
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
-
         with:
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # S3へ同期（古いファイル削除もしたいので --delete）
       - name: Sync to S3
         run: |
-          aws s3 sync ./out s3://${S3_BUCKET}/ \
-            --delete
-
+          aws s3 sync ./out s3://${{ env.S3_BUCKET }}/ --delete
