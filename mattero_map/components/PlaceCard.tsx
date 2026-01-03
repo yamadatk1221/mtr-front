@@ -28,7 +28,7 @@ export function PlaceCard({ place, onClick }: Props) {
 
         {place.visitedAt && (
           <Text size="sm" c="dimmed">
-            {place.visitedAt.toLocaleDateString()}
+            {place.visitedAt}
           </Text>
         )}
 

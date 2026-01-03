@@ -12,10 +12,10 @@ export type place = {
   lat: number;
 
   /** 訪問日 */
-  visitedAt: Date;
+  visitedAt: string;
 
   /** メモ */
-  memo?: string;
+  memo?: string | null;
 
   /** カテゴリ名 */
   categoryName?: string;
@@ -23,9 +23,12 @@ export type place = {
   /** 公開範囲 */
   isPublic: boolean;
 
+  /** 評価 */
+  value: number;
+
   /**作成日時 */
-  createdAt: Date;
+  createdAt: string;
 
   /**更新日時 */
-  updatedAt: Date;
+  updatedAt: string;
 };

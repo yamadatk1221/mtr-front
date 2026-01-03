@@ -1,50 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MapView from "./components/MapView";
 import { PlaceCard } from "@/components/PlaceCard";
 import { place } from "@/domain/place";
 import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-
-const places: place[] = [
-  {
-    id: "1",
-    name: "東京駅",
-    lat: 35.681236,
-    lng: 139.767125,
-    visitedAt: new Date("2024-07-01"),
-    memo: "",
-    categoryName: "観光",
-    isPublic: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "渋谷GYM",
-    lat: 35.6595,
-    lng: 139.7005,
-    visitedAt: new Date("2024-06-15"),
-    memo: "スミスマシンがなかった",
-    categoryName: "筋トレ",
-    isPublic: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "3",
-    name: "蒲田GYM",
-    lat: 35.562,
-    lng: 139.716,
-    visitedAt: new Date("2024-06-15"),
-    memo: "フリーウェイトが充実してた",
-    categoryName: "筋トレ",
-    isPublic: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+import { fetchPlaces } from "@/Infra/place/placeApi";
 
 export default function Home() {
   const [lastTap, setLastTap] = useState<{ lat: number; lng: number } | null>(
@@ -53,8 +15,19 @@ export default function Home() {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedPlace, setSelectedPlace] = useState<place | null>(null);
 
+  const [places, setPlaces] = useState<place[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPlaces({ isPublic: true }) // 例：公開だけ
+      .then(setPlaces)
+      .catch((e) => setError(String(e)));
+  }, []);
+
+  /* UI */
   return (
     <main style={{ position: "relative" }}>
+      {error && <div style={{ padding: 12, color: "crimson" }}>{error}</div>}
       {/* <div style={{ padding: 12 }}>
         <PlaceCard place={places[0]} onClick={() => alert("tap")} />
       </div> */}
