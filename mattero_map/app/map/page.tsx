@@ -1,23 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import MapView from "./components/MapView";
 import { PlaceCard } from "@/components/PlaceCard";
 import { place } from "@/domain/place";
-import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { fetchPlaces } from "@/Infra/place/placeApi";
+import { Input, Radio, Group, Modal } from "@mantine/core";
 
 export default function Home() {
+  // 場所リスト
+  const [places, setPlaces] = useState<place[]>([]);
+  // エラーメッセージ
+  const [error, setError] = useState<string | null>(null);
+  // ルーター
+  const router = useRouter();
+  // 最後にタップした場所（仮ピン用）
   const [lastTap, setLastTap] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  // 登録モーダルの開閉
   const [opened, { open, close }] = useDisclosure(false);
+  // 選択中の場所
   const [selectedPlace, setSelectedPlace] = useState<place | null>(null);
 
-  const [places, setPlaces] = useState<place[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
+  // 初回マウント時に場所リストを取得
   useEffect(() => {
     fetchPlaces({ isPublic: true }) // 例：公開だけ
       .then(setPlaces)
@@ -31,6 +39,17 @@ export default function Home() {
       {/* <div style={{ padding: 12 }}>
         <PlaceCard place={places[0]} onClick={() => alert("tap")} />
       </div> */}
+      <div style={{ padding: 12 }}>
+        <Input.Wrapper label="Input label">
+          <Input size="xs" placeholder="Input component" />
+        </Input.Wrapper>
+      </div>
+      <div style={{ padding: 12 }}>
+        <Group>
+          <Radio checked label="public" />
+          <Radio label="private" />
+        </Group>
+      </div>
 
       <div>
         <MapView
@@ -50,12 +69,17 @@ export default function Home() {
             position: "fixed",
             left: 12,
             right: 12,
-            top: 12,
+            top: 120,
             zIndex: 20,
           }}
         >
           <div style={{ position: "relative" }}>
-            <PlaceCard place={selectedPlace} onClick={() => {}} />
+            <PlaceCard
+              place={selectedPlace}
+              onClick={() => {
+                router.push(`/place?id=${selectedPlace.id}`);
+              }}
+            />
 
             <button
               onClick={() => setSelectedPlace(null)}
