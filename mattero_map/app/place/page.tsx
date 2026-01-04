@@ -1,12 +1,10 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { place } from "@/domain/place";
-import { placeDetail } from "@/domain/placeDetail";
 import { Stack, Text, Badge } from "@mantine/core";
 import { StarRating } from "@/components/StarRating";
 import { VisitHistoryItem } from "@/components/VisitHistoryItem";
+import { placeDetail } from "@/domain/placeDetail";
 
 export default function PlacePage() {
   // クエリパラメータ取得
@@ -15,17 +13,17 @@ export default function PlacePage() {
   const id = sp.get("id");
   // ルーター
   const router = useRouter();
-  // 場所詳細
-  //const [place, setPlace] = useState<place>();
+
+  // 場所詳細（今はダミー）
   const placeDetail: placeDetail = {
     place: {
       id: "1",
-      name: "Sample Place",
+      name: "RE1 PRIVATEGYM",
       lng: 139.6917,
       lat: 35.6895,
       visitedAt: "2024-01-01",
-      memo: "This is a sample place.",
-      categoryName: "Traning",
+      memo: "最寄り駅は四谷三丁目駅で、徒歩たったの1分。",
+      categoryName: "筋トレ",
       isPublic: true,
       value: 5,
       createdAt: "2024-01-01T00:00:00Z",
@@ -36,7 +34,7 @@ export default function PlacePage() {
         id: "h1",
         placeId: "1",
         visitedAt: "2024-01-01",
-        memo: "First visit",
+        memo: "ベンチ\nふじこ：90kg、あらこ：80kg、やまだ：70kg\nスクワット\nふじこ：90kg、あらこ：80kg、やまだ：70kg",
         cost: 3000,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z",
@@ -45,7 +43,7 @@ export default function PlacePage() {
         id: "h2",
         placeId: "1",
         visitedAt: "2024-02-01",
-        memo: "Second visit",
+        memo: "ベンチ\nふじこ：90kg、あらこ：80kg、やまだ：70kg\nスクワット\nふじこ：90kg、あらこ：80kg、やまだ：70kg",
         cost: 5000,
         createdAt: "2024-02-01T00:00:00Z",
         updatedAt: "2024-02-01T00:00:00Z",
@@ -55,16 +53,16 @@ export default function PlacePage() {
       {
         id: "f1",
         placeId: "1",
-        fileUrl: "/images/sampleImage.jpeg",
-        fileName: "sampleImage.jpeg",
+        fileUrl: "/images/sample1.webp",
+        fileName: "sample1.webp",
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z",
       },
       {
-        id: "f1",
+        id: "f2",
         placeId: "1",
-        fileUrl: "/images/sampleImage.jpeg",
-        fileName: "sampleImage.jpeg",
+        fileUrl: "/images/sample2.webp",
+        fileName: "sample2.webp",
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z",
       },
@@ -73,6 +71,7 @@ export default function PlacePage() {
 
   return (
     <main style={{ position: "relative", padding: 12 }}>
+      {/* 右上 Edit */}
       {id && (
         <button
           onClick={() => router.push(`/place/edit?id=${id}`)}
@@ -83,6 +82,7 @@ export default function PlacePage() {
           Edit
         </button>
       )}
+
       {id ? (
         <div>
           <Stack gap="sm">
@@ -93,8 +93,10 @@ export default function PlacePage() {
             {placeDetail.place.categoryName && (
               <Badge variant="light">★ {placeDetail.place.categoryName}</Badge>
             )}
+
             <StarRating rating={placeDetail.place.value} showValue />
 
+            {/* 画像 横スクロール */}
             {placeDetail.placeFiles.length > 0 && (
               <div
                 style={{
@@ -102,17 +104,17 @@ export default function PlacePage() {
                   gap: 8,
                   overflowX: "auto",
                   paddingBottom: 4,
-                  WebkitOverflowScrolling: "touch", // iOSでヌルっと
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
                 {placeDetail.placeFiles.map((file) => (
                   <img
-                    key={file.fileUrl}
+                    key={file.id}
                     src={file.fileUrl}
                     alt={file.fileName}
                     style={{
-                      height: 200, // 高さ固定が一番安定
-                      flex: "0 0 auto", // 横に並べる
+                      height: 200,
+                      flex: "0 0 auto",
                       borderRadius: 8,
                       objectFit: "cover",
                     }}
@@ -120,6 +122,7 @@ export default function PlacePage() {
                 ))}
               </div>
             )}
+
             {placeDetail.place.visitedAt && (
               <Text size="sm" c="dimmed">
                 {placeDetail.place.visitedAt}
@@ -132,25 +135,57 @@ export default function PlacePage() {
               </Text>
             )}
           </Stack>
-          <h3>History</h3>
-          {placeDetail.placeHistories
-            .sort(
-              (a, b) =>
-                new Date(b.visitedAt).getTime() -
-                new Date(a.visitedAt).getTime()
-            )
-            .map((h) => (
-              <VisitHistoryItem
-                key={h.id}
-                id={h.id}
-                visitedAt={h.visitedAt}
-                memo={h.memo}
-                cost={h.cost}
-              />
-            ))}
-          <button onClick={() => router.back()} style={btn()}>
+
+          {/* History 見出し右上に Add */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 16,
+              marginBottom: 8,
+            }}
+          >
+            <h3 style={{ margin: 0 }}>History</h3>
+
+            <button
+              onClick={() =>
+                router.push(
+                  `/place/history/add?placeId=${placeDetail.place.id}`
+                )
+              }
+              style={addMiniBtn()}
+              aria-label="add history"
+              title="履歴を追加"
+              type="button"
+            >
+              ＋ Add
+            </button>
+          </div>
+
+          {/* 履歴一覧 */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {placeDetail.placeHistories
+              .slice()
+              .sort(
+                (a, b) =>
+                  new Date(b.visitedAt).getTime() -
+                  new Date(a.visitedAt).getTime()
+              )
+              .map((h) => (
+                <VisitHistoryItem
+                  key={h.id}
+                  id={h.id}
+                  visitedAt={h.visitedAt}
+                  memo={h.memo}
+                  cost={h.cost}
+                />
+              ))}
+          </div>
+
+          {/* <button onClick={() => router.back()} style={btn()} type="button">
             ← Back
-          </button>
+          </button> */}
         </div>
       ) : (
         <>
@@ -158,7 +193,7 @@ export default function PlacePage() {
           <p>
             例：<code>/place?id=123</code>
           </p>
-          <button onClick={() => router.push("/")} style={btn()}>
+          <button onClick={() => router.push("/")} style={btn()} type="button">
             ホームへ
           </button>
         </>
@@ -191,5 +226,18 @@ function editBtn(): React.CSSProperties {
     cursor: "pointer",
     fontWeight: 300,
     zIndex: 50,
+  };
+}
+
+function addMiniBtn(): React.CSSProperties {
+  return {
+    padding: "6px 10px",
+    borderRadius: 9999,
+    border: "1px solid #ddd",
+    background: "#fff",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 500,
+    whiteSpace: "nowrap",
   };
 }

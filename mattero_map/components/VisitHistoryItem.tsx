@@ -1,11 +1,13 @@
 // src/components/VisitHistoryItem.tsx
 "use client";
 
+import { useState } from "react";
+
 type VisitHistoryItemProps = {
   id: string;
   visitedAt: string;
   memo?: string | null;
-  cost?: number | null; // ★追加
+  cost?: number | null;
 };
 
 export function VisitHistoryItem({
@@ -15,6 +17,7 @@ export function VisitHistoryItem({
   cost,
 }: VisitHistoryItemProps) {
   const date = new Date(visitedAt);
+  const [open, setOpen] = useState(false);
 
   return (
     <div
@@ -29,13 +32,18 @@ export function VisitHistoryItem({
         gap: 6,
       }}
     >
-      {/* 日付 + 金額 */}
-      <div
+      {/* ヘッダー：日付 + 金額 + 開閉 */}
+      <button
+        type="button"
+        onClick={() => memo && setOpen((v) => !v)}
         style={{
+          all: "unset",
+          cursor: memo ? "pointer" : "default",
           display: "flex",
           alignItems: "center",
           gap: 8,
         }}
+        aria-expanded={open}
       >
         <div style={{ fontSize: 12, fontWeight: 700 }}>{formatDate(date)}</div>
 
@@ -44,20 +52,42 @@ export function VisitHistoryItem({
             style={{
               fontSize: 12,
               fontWeight: 700,
-              color: "#0f766e", // 少し強調（お好みで）
+              color: "#0f766e",
             }}
           >
             ￥{formatYen(cost)}
           </div>
         )}
-      </div>
 
-      {/* メモ */}
-      {memo ? (
-        <div style={{ fontSize: 14, lineHeight: 1.5 }}>{memo}</div>
-      ) : (
-        <div style={{ fontSize: 13, opacity: 0.6 }}>メモなし</div>
+        {/* 右寄せの開閉アイコン */}
+        {memo && (
+          <div
+            style={{
+              marginLeft: "auto",
+              fontSize: 12,
+              opacity: 0.6,
+            }}
+          >
+            {open ? "▲" : "▼"}
+          </div>
+        )}
+      </button>
+
+      {/* メモ（アコーディオン） */}
+      {memo && open && (
+        <div
+          style={{
+            fontSize: 14,
+            lineHeight: 1.5,
+            whiteSpace: "pre-wrap",
+            paddingTop: 4,
+          }}
+        >
+          {memo}
+        </div>
       )}
+
+      {!memo && <div style={{ fontSize: 13, opacity: 0.6 }}>メモなし</div>}
     </div>
   );
 }
@@ -67,6 +97,5 @@ function formatDate(date: Date) {
 }
 
 function formatYen(cost: number) {
-  // 12345 → "12,345"
   return cost.toLocaleString("ja-JP");
 }
