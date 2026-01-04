@@ -2,6 +2,7 @@
 
 import { Card, Text, Group, Stack, Badge } from "@mantine/core";
 import { place } from "../domain/place";
+import { StarRating } from "./StarRating";
 
 type Props = {
   place: place;
@@ -25,6 +26,7 @@ export function PlaceCard({ place, onClick }: Props) {
         {place.categoryName && (
           <Badge variant="light">★ {place.categoryName}</Badge>
         )}
+        {place.value && <StarRating rating={place.value} showValue />}
 
         {place.visitedAt && (
           <Text size="sm" c="dimmed">
