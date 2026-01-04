@@ -40,15 +40,26 @@ export default function Home() {
         <PlaceCard place={places[0]} onClick={() => alert("tap")} />
       </div> */}
       <div style={{ padding: 12 }}>
-        <Input.Wrapper label="Input label">
-          <Input size="xs" placeholder="Input component" />
-        </Input.Wrapper>
-      </div>
-      <div style={{ padding: 12 }}>
         <Group>
           <Radio checked label="public" />
           <Radio label="private" />
         </Group>
+      </div>
+      <div style={{ padding: 12 }}>
+        <Input.Wrapper label="Adress">
+          <Group gap="xs" align="flex-end">
+            <Input size="xs" placeholder="ex) Tokyo" style={{ flex: 1 }} />
+            <button
+              type="button"
+              onClick={() => {
+                // 検索処理
+              }}
+              style={searchBtn()}
+            >
+              Search
+            </button>
+          </Group>
+        </Input.Wrapper>
       </div>
 
       <div>
@@ -67,10 +78,12 @@ export default function Home() {
         <div
           style={{
             position: "fixed",
-            left: 12,
-            right: 12,
-            top: 120,
+            top: "40%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             zIndex: 20,
+            maxWidth: "calc(100vw - 24px)", // 余白12px×2
+            width: 360, // お好み
           }}
         >
           <div style={{ position: "relative" }}>
@@ -164,4 +177,16 @@ export default function Home() {
       </Modal>
     </main>
   );
+
+  function searchBtn(): React.CSSProperties {
+    return {
+      padding: "6px 12px",
+      borderRadius: 3,
+      border: "1px solid #ddd",
+      background: "#fff",
+      cursor: "pointer",
+      fontSize: 12,
+      whiteSpace: "nowrap",
+    };
+  }
 }
